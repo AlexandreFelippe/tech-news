@@ -1,4 +1,5 @@
 import requests
+import parsel
 import time
 from parsel import Selector
 
@@ -45,8 +46,28 @@ def scrape_next_page_link(html_content):
 
 # Requisito 4
 def scrape_news(html_content):
-    """Seu código deve vir aqui"""
-    raise NotImplementedError
+    selector = parsel.Selector(text=html_content)
+
+    url = selector.css("head link[rel='canonical']::attr(href)").get()
+    title = selector.css(".entry-title::text").get().strip()
+    timestamp = selector.css(".meta-date::text").get()
+    writer = selector.css(".author a::text").get()
+    reading_time = int(
+        selector.css(".meta-reading-time::text").re_first(r'\d+'))
+    summary = selector.css(".entry-content p").xpath("string()").get().strip()
+    category = selector.css(".meta-category .label::text").get()
+
+    news_data = {
+        "url": url,
+        "title": title,
+        "timestamp": timestamp,
+        "writer": writer,
+        "reading_time": reading_time,
+        "summary": summary,
+        "category": category
+    }
+
+    return news_data
 
 
 # Requisito 5
