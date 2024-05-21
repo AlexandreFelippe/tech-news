@@ -1,12 +1,16 @@
 import requests
 import time
+from parsel import Selector
 
 
 # Requisito 1
 def fetch(url):
-    time.sleep(3)
+    headers = {
+        "User-Agent": "Fake user-agent"
+    }
+    time.sleep(1)
     try:
-        response = requests.get(url)
+        response = requests.get(url, headers=headers, timeout=3)
         if response.status_code == 200:
             return response.text
         else:
@@ -14,22 +18,29 @@ def fetch(url):
     except requests.exceptions.RequestException:
         return None
 
-    if __name__ == "__main__":
-        url = "https://blog.betrybe.com"
-        html = fetch(url)
-        print(html[:500])
-
 
 # Requisito 2
 def scrape_updates(html_content):
-    """Seu código deve vir aqui"""
-    raise NotImplementedError
+    if not html_content:
+        return []
+
+    selector = Selector(html_content)
+
+    news_urls = selector.css("h2.entry-title a::attr(href)").getall()
+
+    return news_urls
 
 
 # Requisito 3
 def scrape_next_page_link(html_content):
-    """Seu código deve vir aqui"""
-    raise NotImplementedError
+    if not html_content:
+        return None
+
+    selector = Selector(html_content)
+
+    next_page_url = selector.css("a.next.page-numbers::attr(href)").get()
+
+    return next_page_url
 
 
 # Requisito 4
